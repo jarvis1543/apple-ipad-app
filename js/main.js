@@ -43,10 +43,11 @@ const searchDelayEls = [...searchWrapEl.querySelectorAll('li')];
 const searchInputEl = searchWrapEl.querySelector('input');
 
 searchStarterEl.addEventListener('click', showSearch);
-searchCloserEl.addEventListener('click', hideSearch);
-searchShadowEl.addEventListener('click', () => {
+searchCloserEl.addEventListener('click', (event) => {
+  event.stopPropagation();
   hideSearch();
 });
+searchShadowEl.addEventListener('click', hideSearch);
 
 function showSearch() {
   headerEl.classList.add('searching');
@@ -76,6 +77,70 @@ function hideSearch() {
     el.style.transitionDelay = i * 0.4 / searchDelayEls.length + 's';
   });
   searchDelayEls.reverse();
+}
+
+function playScroll() {
+  document.documentElement.classList.remove('fixed');
+}
+function stopScroll() {
+  document.documentElement.classList.add('fixed');
+}
+
+
+// 헤더 메뉴 토글
+const menuStarterEl = document.querySelector('header .menu-starter');
+menuStarterEl.addEventListener('click', () => {
+  if (headerEl.classList.contains('menuing')) {
+    headerEl.classList.remove('menuing');
+    searchInputEl.value = '';
+    playScroll();
+  } else {
+    headerEl.classList.add('menuing');
+    stopScroll();
+  }
+});
+
+// 헤더 검색
+const searchTextFieldEl = document.querySelector('header .textfield');
+const searchCancelEl = document.querySelector('header .search-canceler');
+searchTextFieldEl.addEventListener('click', () => {
+  headerEl.classList.add('searching--mobile');
+  searchInputEl.focus();
+});
+searchCancelEl.addEventListener('click', () => {
+  headerEl.classList.remove('searching--mobile');
+});
+
+window.addEventListener('resize', () => {
+  if(window.innerWidth <= 740) {
+    headerEl.classList.remove('searching');
+  }else {
+    headerEl.classList.remove('searching--module');
+  }
+});
+
+// mobile-nav
+const navEl = document.querySelector('nav');
+const navMenuTogglerEl = navEl.querySelector('.menu-toggler');
+const navMenuShadowEl = navEl.querySelector('.shadow');
+navMenuShadowEl.addEventListener('click', hideNavMenu);
+navMenuTogglerEl.addEventListener('click', () => {
+  if(navEl.classList.contains('menuing')){
+    hideNavMenu();
+  }else{
+    showNavMenu();
+  }
+});
+navEl.addEventListener('click', (event) => {
+  event.stopPropagation();
+});
+window.addEventListener('click', hideNavMenu);
+
+function showNavMenu() {
+  navEl.classList.add('menuing');
+}
+function hideNavMenu() {
+  navEl.classList.remove('menuing');
 }
 
 // 요소의 가시성 관찰
@@ -156,6 +221,7 @@ navigations.forEach( nav => {
   mapEl.innerHTML = /* html */ `
     <h3>
       <span class="text">${nav.title}</span>
+      <span class="icon">+</span>
     </h3>
     <ul>
         ${mapList}
@@ -166,3 +232,11 @@ navigations.forEach( nav => {
 
 const thisYear = document.querySelector('span.this-year');
 thisYear.innerText = new Date().getFullYear();
+
+const mapEls = document.querySelectorAll('footer .navigations .map');
+mapEls.forEach( el => {
+  const h3El = el.querySelector('h3');
+  h3El.addEventListener('click', () => {
+    el.classList.toggle('active');
+  });
+});
